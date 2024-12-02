@@ -31,9 +31,7 @@ function isSafeReport(levels) {
 }
 
 function partOne() {
-  const reports = getReports();
-  const safeReports = reports.filter(isSafeReport);
-  return safeReports.length;
+  return getReports().filter(isSafeReport).length;
 }
 
 function partTwo() {
