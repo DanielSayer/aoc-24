@@ -49,15 +49,10 @@ function partTwo() {
   const seriesList = readUpates();
   const invalidSeries = seriesList.filter((series) => !isValid(series));
 
-  const fixedSeries = invalidSeries.map(rebuildSeries);
-  const validSeriesCenter = fixedSeries.map(
-    (series) => series[(series.length - 1) / 2]
-  );
+  const invalidSeriesCenters = invalidSeries.map(getMiddle);
+  return invalidSeriesCenters.reduce((a, b) => a + b, 0);
 
-  return validSeriesCenter.reduce((a, b) => a + b, 0);
-
-  function rebuildSeries(series) {
-    const rebuiltArray = new Array(series.length);
+  function getMiddle(series) {
     for (let i = 0; i < series.length; i++) {
       const seriesTemp = [...series];
       const val = series[i];
@@ -67,10 +62,13 @@ function partTwo() {
       const focusedFAV = forbiddenAfterVal.intersection(
         new Set([...seriesTemp])
       );
-      rebuiltArray[focusedFAV.size] = val;
+
+      if (focusedFAV.size === (series.length - 1) / 2) {
+        return val;
+      }
     }
 
-    return rebuiltArray;
+    return middle;
   }
 }
 
