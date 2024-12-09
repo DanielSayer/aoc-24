@@ -7,6 +7,8 @@ function partOne() {
   let spaceUsed = 0;
   const arr = [];
   const freeSpaceIndices = [];
+  const pushNTimes = (n, value) => arr.push(...Array(n).fill(value));
+
   for (let i = 0; i < input.length; i++) {
     const num = Number(input[i]);
 
@@ -22,38 +24,28 @@ function partOne() {
     }
   }
 
-  function pushNTimes(n, value) {
-    for (let i = 0; i < n; i++) {
-      arr.push(value);
+  let compactIndex = freeSpaceIndices.shift();
+  for (let i = arr.length - 1; i >= spaceUsed; i--) {
+    if (arr[i] !== ".") {
+      arr[compactIndex] = arr[i];
+      compactIndex = freeSpaceIndices.shift();
+      arr[i] = ".";
+      if (compactIndex === undefined) break;
     }
   }
 
-  while (freeSpaceIndices.length > 0 && arr.length > spaceUsed) {
-    const lastEl = arr.pop();
-    if (lastEl === ".") {
-      continue;
-    }
-
-    const firstAvailableIndex = freeSpaceIndices.shift();
-    if (firstAvailableIndex > spaceUsed) {
-      continue;
-    }
-    arr[firstAvailableIndex] = lastEl;
-  }
-
-  const spacedArr = arr.map(Number);
-
-  const checkSum = spacedArr.reduce((a, b, i) => a + b * i, 0);
-
-  return checkSum;
+  return arr.reduce(
+    (checksum, block, index) =>
+      block === "." ? checksum : checksum + block * index,
+    0
+  );
 }
 
 function partTwo() {
-  const startTime = Date.now();
-
   let id = 0;
   const arr = [];
-  const spaces = {};
+  const spaces = [];
+  const pushNTimes = (n, value) => arr.push(...Array(n).fill(value));
 
   for (let i = 0; i < input.length; i++) {
     const num = Number(input[i]);
@@ -63,46 +55,38 @@ function partTwo() {
       id++;
     } else {
       if (num === 0) continue;
-      spaces[arr.length] = num;
+      spaces.push({ start: arr.length, size: num });
       pushNTimes(num, 0);
     }
   }
 
-  function pushNTimes(n, value) {
-    for (let i = 0; i < n; i++) {
-      arr.push(value);
+  for (let currentId = id - 1; currentId >= 0; currentId--) {
+    const spacesRequired = Number(input[currentId * 2]);
+    const valIndex = arr.findIndex((el) => el === currentId);
+
+    for (let i = 0; i < spaces.length; i++) {
+      const { start, size } = spaces[i];
+
+      if (size >= spacesRequired && start < valIndex) {
+        for (let j = 0; j < spacesRequired; j++) {
+          arr[start + j] = currentId;
+          arr[valIndex + j] = 0;
+        }
+        if (size === spacesRequired) {
+          spaces.splice(i, 1);
+        } else {
+          spaces[i] = {
+            start: start + spacesRequired,
+            size: size - spacesRequired,
+          };
+        }
+
+        break;
+      }
     }
   }
 
-  const lastId = id - 1;
-  Array.from({ length: lastId }, (_, i) => lastId - i).forEach((val) => {
-    const spacesRequired = Number(input[val * 2]);
-
-    Object.keys(spaces).every((key) => {
-      const index = Number(key);
-      const spaceAvailable = spaces[index];
-      if (spaceAvailable >= spacesRequired) {
-        const valIndex = arr.findIndex((el) => el === val);
-        if (index > valIndex) return true;
-
-        spaces[index + spacesRequired] = spaceAvailable - spacesRequired;
-        delete spaces[index];
-
-        for (let i = 0; i < spacesRequired; i++) {
-          arr[valIndex + i] = 0;
-          arr[index + i] = val;
-        }
-
-        return false;
-      }
-      return true;
-    });
-  });
-
   const checkSum = arr.reduce((a, b, i) => a + b * i, 0);
-
-  const endTime = Date.now();
-  console.log((endTime - startTime) * 1000);
   return checkSum;
 }
 
