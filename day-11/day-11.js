@@ -42,5 +42,5 @@ function solve(stones, iterations) {
   return count;
 }
 
-// console.log(solve(stones, 25));
+console.log(solve(stones, 25));
 console.log(solve(stones, 75));
