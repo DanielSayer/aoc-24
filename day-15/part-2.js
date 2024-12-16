@@ -97,7 +97,7 @@ function canPushVertical(pos, direction) {
   let canPush = true;
 
   while (positions.length > 0 && canPush) {
-    const movingPos = positions.shift();
+    const movingPos = positions.pop();
     const nextPos = getNextPos(movingPos.pos, direction);
     const itemInNextPos = warehouse[nextPos[1]][nextPos[0]];
 
@@ -134,7 +134,7 @@ function pushVertical(pos, direction) {
   const pushedPostitions = new Set();
 
   while (positions.length > 0) {
-    const movingPos = positions.shift();
+    const movingPos = positions.pop();
     const nextPos = getNextPos(movingPos.pos, direction);
     const itemInNextPos = warehouse[nextPos[1]][nextPos[0]];
 
