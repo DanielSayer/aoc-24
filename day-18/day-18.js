@@ -1,13 +1,14 @@
 const fs = require("fs");
+const { queryObjects } = require("v8");
 
 const rows = 71;
 const cols = 71;
 
 const DIRECTIONS = [
-  { dx: 0, dy: 1, dir: "E" },
-  { dx: 1, dy: 0, dir: "S" },
-  { dx: 0, dy: -1, dir: "W" },
-  { dx: -1, dy: 0, dir: "N" },
+  { dx: 0, dy: 1 },
+  { dx: 1, dy: 0 },
+  { dx: 0, dy: -1 },
+  { dx: -1, dy: 0 },
 ];
 
 const map = Array.from({ length: rows }, () => Array(cols).fill("."));
@@ -22,23 +23,23 @@ const isValid = (x, y, map) => {
 function shortestPath(map) {
   const start = { x: 0, y: 0 };
   const end = { x: rows - 1, y: cols - 1 };
-  const pq = [];
-  pq.push([0, start.x, start.y, "E"]);
-  const visited = new Map();
-  const getKey = (x, y, dir) => `${x},${y},${dir}`;
-  while (pq.length > 0) {
-    pq.sort((a, b) => a[0] - b[0]);
-    const [score, x, y, dir] = pq.shift();
-    if (x === end.x && y === end.y) return score;
-    const key = getKey(x, y, dir);
-    if (visited.has(key)) continue;
-    visited.set(key, score);
+  const queue = [{ ...start, distance: 0 }];
+  const visited = new Set();
+  visited.add(`${start.x},${start.y}`);
+
+  while (queue.length > 0) {
+    const { x, y, distance } = queue.shift();
+
+    if (x === end.x && y === end.y) {
+      return distance;
+    }
+
     DIRECTIONS.forEach((d) => {
       const nx = x + d.dx;
       const ny = y + d.dy;
-      if (isValid(nx, ny, map)) {
-        const newScore = score + 1;
-        pq.push([newScore, nx, ny, d.dir]);
+      if (isValid(nx, ny, map) && !visited.has(`${nx},${ny}`)) {
+        queue.push({ x: nx, y: ny, distance: distance + 1 });
+        visited.add(`${nx},${ny}`);
       }
     });
   }
@@ -63,9 +64,7 @@ function partOne() {
 }
 
 function partTwo() {
-  const bytesPrefallen = 2000;
-  makeBytesFall(coords, bytesPrefallen);
-  for (let i = bytesPrefallen; i < coords.length; i++) {
+  for (let i = 0; i < coords.length; i++) {
     addByte(coords[i]);
     const shortestPathLength = shortestPath(map);
 
